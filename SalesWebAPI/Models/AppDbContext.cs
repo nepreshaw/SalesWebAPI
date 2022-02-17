@@ -9,6 +9,7 @@ namespace SalesWebAPI.Models {
 
         public virtual DbSet<Customer> Customers { get; set; }
         public virtual DbSet<Order> Orders { get; set; }
+        public virtual DbSet<OrderLine> OrderLines { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options): base(options) { }
 
