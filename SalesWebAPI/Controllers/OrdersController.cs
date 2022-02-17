@@ -21,6 +21,21 @@ namespace SalesWebAPI.Controllers
             _context = context;
         }
 
+        //quantity and price are in orderlines so we dont need to do a join
+        //need to read the order first
+        //the other put method had the same url so we added the Recalc text
+        // PUT: api/Orders/Recalc/5
+        [HttpPut("recalc/{orderid}")]
+        //action results lets us return something if it goes wrong
+        public async Task<ActionResult> RecalculateOrder(int orderId) {
+            var order = await _context.Orders.FindAsync(orderId);
+            var sum = order.Orderlines.Sum(x => x.Quantity * x.Price);
+            order.Total = sum;
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
+
         // GET: api/Orders
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Order>>> GetOrders()
@@ -32,7 +47,10 @@ namespace SalesWebAPI.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Order>> GetOrder(int id)
         {
-            var order = await _context.Orders.Include(x => x.Customer).SingleOrDefaultAsync(x => x.Id == id);
+            var order = await _context.Orders
+                                      .Include(x => x.Customer)
+                                      .Include(x => x.Orderlines)
+                                      .SingleOrDefaultAsync(x => x.Id == id);
 
             if (order == null)
             {
